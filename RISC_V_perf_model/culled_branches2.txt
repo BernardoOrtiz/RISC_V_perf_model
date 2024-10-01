@@ -1,0 +1,556 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+/*
+#include "OS.h"
+
+IO_port TLB_code_ctrl	0x10002000 
+IO_port TLB_data_ctrl	0x10002010 
+IO_port TLB_code_vaddr	0x10002020 // 32b OS -> 32b reg
+IO_port TLB_data_vaddr	0x10002030 // 64b OS -> 64b reg
+IO_port TLB_code_4K_page	0x10002040 // 
+IO_port TLB_data_4k_page	0x10002050 // 
+IO_port TLB_code_2M_page	0x10002060 // 
+IO_port TLB_data_2M_page	0x10002070 // 
+
+IO_port L0C_ctrl 0x100020b0 
+IO_port L0D_ctrl 0x100020c0 
+IO_port L2_ctrl	0x100020d0 
+
+
+
+void exception_handler(){
+	//	sp -= (0x100);// integer multiply by 8
+	fence;
+	scratch = sp;// mscratch if m mode, sscratch if s mode
+	sp = tvec + ((mhartid+ 1)<< 21);// avoids recalculating on every page miss - 32b reg
+	sp[0] = ra;
+	sp[1] = gp;
+	sp[2] = tp;
+	sp[3] = t00;
+	sp[4] = s03;
+	sp[5] = s04;
+	sp[6] = s00;
+	sp[7] = s01;
+	sp[8] = a0;
+	sp[9] = a1;
+	sp[10] = a2;
+	sp[11] = a3;
+	sp[12] = s02;
+	sp[13] = t01;
+	sp[14] = s05;
+	sp[15] = s06;
+	sp[16] = s07;
+	sp[17] = s08;
+	sp[18] = s09;
+	sp[19] = s10;
+	sp[20] = s11;
+	sp[21] = s12;
+	sp[22] = s13;
+	sp[23] = s14;
+	sp[24] = s15;
+	sp[25] = s16;
+	sp[26] = s17;
+	sp[27] = s18;
+	sp[29] = s19;
+	sp[30] = s20;
+	switch (mcause){
+	case 0x08 ://3
+		instruction_address_breakpoint();
+		break;
+	case 0x1100 :
+	case 0x1200 :
+	case 0x1300 :
+	case 0x1800 :
+	case 0x1900 :
+	case 0x1a00 :
+	case 0x1b00 :
+	case 0x3000 :
+	case 0x3100 :
+	case 0x3200 :
+	case 0x3300 :
+	case 0x3800 :
+	case 0x3900 :
+	case 0x3a00 :
+	case 0x3b00 :
+	case 0x9000 :
+	case 0x9100 :
+	case 0x9200 :
+	case 0x9300 :
+	case 0x9800 :
+	case 0x9900 :
+	case 0x9a00 :
+	case 0x9b00 :
+	case 0xb000 :
+	case 0xb100 :
+	case 0xb200 :
+	case 0xb300 :
+	case 0xb800 :
+	case 0xb900 :
+	case 0xba00 :
+	case 0xbb00 :
+	case 0x1000 ://12
+// 		instruction_page_fault();
+		{ 
+			// 	UINT8 swap = load_TLB(mtval, 9, 0);
+			UINT8 swap;
+			{ 
+				UINT8 swap_1;
+				UINT L2_hit;
+				atomic UINT64* pte;
+				UINT64 PageTableEntry;
+				UINT64 v_addr2 = mtval;
+				pte = (((v_addr2 >> 39)& 0x01f)<< 3)| 0x80400000;	//L3 address
+				PageTableEntry = pte[0];
+				swap_1 = (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 30)& 0x01f)<< 3);	//L2 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 21)& 0x1ff)<< 3);	//L1 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				if (PageTableEntry & 0x0f == 1){
+					pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 12)& 0x1ff)<< 3);	//L0
+					PageTableEntry = pte[0]; // need to update TLB caches
+					swap_1 |= (PageTableEntry & 9)^ 9 ;
+						TLB_code_4K_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					if ((((PageTableEntry & 6)> 0)&& ((PageTableEntry & 1)== 1))){
+						TLB_data_4k_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+				}
+				else {
+					swap_1 |= (PageTableEntry & 9)^ 9 ;
+						TLB_code_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					if ((((PageTableEntry & 6)> 0)&& ((PageTableEntry & 1)== 1))){
+						TLB_data_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+				}
+				swap = swap_1;
+			} 
+			if (swap){//page not in memory or memory in use, move to OS control (OS) 
+				scause |= 0x00001000 ;
+				stval = mtval;
+			}
+			mcause &= ~0x00001000;
+		} 
+		break;
+	case 0x0002 ://1
+		instruction_access_fault();
+		break;
+	case 0x0004 ://2
+		Illegal_instruction();
+		break;
+	case 0x0001 ://0
+		instruction_address_missalignment();
+		break;
+	case 0x0900 :
+	case 0x0a00 :
+	case 0x0b00 :
+	case 0x2800 :
+	case 0x2900 :
+	case 0x2a00 :
+	case 0x2b00 :
+	case 0x8800 :
+	case 0x8900 :
+	case 0x8a00 :
+	case 0x8b00 :
+	case 0xa800 :
+	case 0xa900 :
+	case 0xaa00 :
+	case 0xab00 :
+	case 0x0800 ://11
+		ecall_from_machine();
+		break;
+	case 0x0300 :
+	case 0x2200 :
+	case 0x2300 :
+	case 0x8200 :
+	case 0x8300 :
+	case 0xa200 :
+	case 0xa300 :
+	case 0x0200 ://9
+// 		ecall_from_supervisor();
+		{ 
+			gp = 0x086400000 ;
+			int entry = 0 ;
+			int hit = 0 ;
+			while (funct_list_gp[entry] && !hit){
+				if (funct_list_gp[entry] == mhartid + 1){
+					entry++;
+					INT64 addr = funct_list_gp[entry++];
+					ra = funct_list_gp[entry++];
+					sp = - 1* (mhartid << 21)+ 0x100000000;
+					gp = 0x0f0000000 ;
+					tp = - 1* ((mhartid + 8)<< 21)+ 0x86300000;// must be non-swapable space
+					a0 = funct_list_gp[entry++]; // argc
+					a1 = tp; // argp
+					a2 = 0 ;
+					a3 = 0 ;
+					for (UINT i = 0 ; i < a0; i++){
+						a1[i] = funct_list_gp[entry++]; copy argument
+					}
+					hit = 1 ;
+					mcause = 0 ;// initiating a thread
+					mstatus = 0x0a ;// enable interrupts
+					goto addr;
+				}
+				else {
+					entry += 3 ;
+					entry += funct_list_gp[entry] + 1;// argc + (argp)
+				}
+			}
+			mcause = 0 ;// initiating a thread
+			mstatus = 0x0a ;// enable interrupts
+			wfi();
+		} 
+		break;
+	case 0x2100 :
+	case 0x8100 :
+	case 0xa100 :
+	case 0x0100 ://8
+// 		ecall_from_user();
+		{ 
+			if (tp[0] == 1){
+				UINT8 count = tp[2];
+				UINT8 return_address = tp[3];
+				gp = 0x086400000 ;
+				UINT8 entry_ptr = 4 ;
+				UINT8 dest_ptr = 0 ;
+				for (UINT i = 0 ; i < count; i++){
+					funct_list_gp[dest_ptr++] = i + 1;// active core
+					funct_list_gp[dest_ptr++] = tp[entry_ptr++];// function address
+					funct_list_gp[dest_ptr++] = return_address;// return address
+					
+					UINT8 argc = tp[entry_ptr++];// argument_count
+					funct_list_gp[dest_ptr++] = argc;// argument_count
+					for (UINT j = 0 ; j < argc; j++){
+						funct_list_gp[dest_ptr++] = tp[entry_ptr++];// argument
+					}
+				}
+				funct_list_gp[dest_ptr++] = 0 ;// active core - stop signal
+				
+				gp = 0x0f0000000 ;
+				int temp = mstatus | ((mstatus & 0xa0)>> 4);// restore state bits
+				temp &= ~0xa0; // clear prior state bits
+				mcause &= ~0x00000100;
+				mstatus = temp & ~0x1900;// clear bits
+				ecall();
+			}
+			else {
+				int temp = mstatus | ((mstatus & 0xa0)>> 4);// restore state bits
+				temp &= ~0xa0; // clear prior state bits
+				mcause &= ~0x00000100;
+				mstatus = temp & ~0x1900;// clear bits
+				wfi();
+			}
+		} 
+		break;
+	case 0x0008 ://3
+		load_store_amo_address_breakpoint();
+		break;
+	case 0x0040 ://6
+		ebreak();
+		break;
+	case 0x0010 ://4
+		load_address_misalignment();
+		break;
+	case 0xa000 :
+	case 0x8000 ://15
+// 		storeAMO_page_fault();
+		{ 
+			// 	UINT8 swap = load_TLB(mtval, 7, 1);
+			UINT8 swap;
+			{ 
+				UINT8 swap_1;
+				UINT L2_hit;
+				atomic UINT64* pte;
+				UINT64 PageTableEntry;
+				UINT64 v_addr2 = mtval;
+				pte = (((v_addr2 >> 39)& 0x01f)<< 3)| 0x80400000;	//L3 address
+				PageTableEntry = pte[0];
+				swap_1 = (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 30)& 0x01f)<< 3);	//L2 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 21)& 0x1ff)<< 3);	//L1 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				if (PageTableEntry & 0x0f == 1){
+					pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 12)& 0x1ff)<< 3);	//L0
+					PageTableEntry = pte[0]; // need to update TLB caches
+					swap_1 |= (PageTableEntry & 7)^ 7 ;
+					if (((PageTableEntry & 9)== 9)){
+						TLB_code_4K_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+						TLB_data_4k_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+				}
+				else {
+					swap_1 |= (PageTableEntry & 7)^ 7 ;
+					if (((PageTableEntry & 9)== 9)){
+						TLB_code_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+						TLB_data_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+				}
+				swap = swap_1;
+			} 
+			if (swap){//page not in memory or memory in use, move to OS control (OS) 
+				scause |= 0x00008000 ;
+				stval = mtval;
+			}
+			mcause &= ~0x00008000;
+		} 
+		break;
+	case 0x2000 ://13
+// 		load_page_fault();
+		{ 
+			// 	UINT8 swap = load_TLB(mtval, 3, 1);
+			UINT8 swap;
+			{ 
+				UINT8 swap_1;
+				UINT L2_hit;
+				atomic UINT64* pte;
+				UINT64 PageTableEntry;
+				UINT64 v_addr2 = mtval;
+				pte = (((v_addr2 >> 39)& 0x01f)<< 3)| 0x80400000;	//L3 address
+				PageTableEntry = pte[0];
+				swap_1 = (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 30)& 0x01f)<< 3);	//L2 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 21)& 0x1ff)<< 3);	//L1 address
+				PageTableEntry = pte[0];
+				swap_1 |= (PageTableEntry & 0x0f)^ 1 ;
+				if (PageTableEntry & 0x0f == 1){
+					pte = ((PageTableEntry << 2)& 0xf0ffff0ffff0f000)| (((v_addr2 >> 12)& 0x1ff)<< 3);	//L0
+					PageTableEntry = pte[0]; // need to update TLB caches
+					swap_1 |= (PageTableEntry & 3)^ 3 ;
+					if (((PageTableEntry & 9)== 9)){
+						TLB_code_4K_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+						TLB_data_4k_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+				}
+				else {
+					swap_1 |= (PageTableEntry & 3)^ 3 ;
+					if (((PageTableEntry & 9)== 9)){
+						TLB_code_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_code_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_code_ctrl = 1 ; // FLUSH TLB
+							L0C_ctrl = 2 ;// flush L0C
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+					}
+						TLB_data_2M_page = PageTableEntry; // sets physical address in TLB cache
+						TLB_data_vaddr = v_addr2; // sets virtual address in TLB cache
+						if (error == 1){
+							TLB_data_ctrl = 1 ; // FLUSH TLB
+							L0D_ctrl = 0 ;// flush and dissable L0D
+							while (L0D_ctrl != 0){} // spin loop
+							L0D_ctrl = 1 ;// enable L0D
+							L2_ctrl = 0 ;// flush and dissable L2
+							while (L2_ctrl != 0){}// spin loop
+							L2_ctrl = 1 ;// enable L2
+						}
+				}
+				swap = swap_1;
+			} 
+			if (swap){//page not in memory or memory in use, move to OS control (OS) 
+				scause |= 0x00002000 ;
+				stval = mtval;
+			}
+			mcause &= ~0x00002000;
+		} 
+		break;
+	case 0x0080 ://7
+		store_amo_access_fault();
+		break;
+	case 0x0020 ://5
+		load_access_fault();
+		break;
+	default:
+		break;
+	}
+	// need to add pop instructions
+	s20 = sp[29];
+	s19 = sp[28];
+	s18 = sp[27];
+	s17 = sp[26];
+	s16 = sp[25];
+	s15 = sp[24];
+	s14 = sp[23];
+	s13 = sp[22];
+	s12 = sp[21];
+	s11 = sp[20];
+	s10 = sp[19];
+	s09 = sp[18];
+	s08 = sp[17];
+	s07 = sp[16];
+	s06 = sp[15];
+	s05 = sp[14];
+	t01 = sp[13];
+	s02 = sp[12];
+	a3 = sp[11];
+	a2 = sp[10];
+	a1 = sp[9];
+	a0 = sp[8];
+	s01 = sp[7];
+	s00 = sp[6];
+	s04 = sp[5];
+	s03 = sp[4];
+	t00 = sp[3];
+	tp = sp[2];
+	gp = sp[1];
+	ra = sp[0];
+	sp = scratch;
+	ret;
+}
+void ssi(){
+}
+void vsi(){
+}
+void msi(){
+}
+void uti(){
+}
+void sti(){
+}
+void vti(){
+}
+void mti(){
+}
+void uei(){
+}
+void sei(){
+}
+void vei(){
+}
+void mei(){
+}
+
+void irq0(){
+}
+void irq1(){
+}
+void irq2(){
+}
+void irq3(){
+}
+void irq4(){
+}
+void irq5(){
+}
+void irq6(){
+}
+void irq7(){
+}
+void irq8(){
+}
+void irq9(){
+}
+void irq10(){
+}
+void irq11(){
+}
+void irq12(){
+}
+void irq13(){
+}
+void irq14(){
+}
+void irq15(){
+}
+/**/}
+}

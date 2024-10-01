@@ -1,0 +1,66 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+
+
+MISA			0x00242129		// svc
+MXL				0x3				// 128b
+sv				sv48			// sv32, sv39, sv48, sv57, sv64 - paging mode
+page_table_ptr	0x8c800000		// must set sv before page table base
+align			128b			// alignment of data arrays on stack
+cache_line		128B			// alignment of function start, maximize cache fetch effectiveness
+decode_width	8				// decode/retire #;as well as fp add units
+fmac			1				// # of fmac units (to be shared with SIMD)
+
+// 0x2390, 2403-2031: start 1st thread, 0x254e/0x2d90-0x3017; end of first inner loop: 0x254d/0x3cd0-0x4124;
+// end of 1st 0x2688: 0x5993-0x5732	(0x21b8)	0x4954 0x54d8
+// end of 2nd 0x2c58: 0x5993-0x5732	(0x279b)	0x4954 0x54d8
+// end of 3rd 0x332e: 0x752b-0x8064	(0x2eaa)	0x62aa 0x669a
+// end of 4th 0x394d: 0x9b65-0x9673	(0x33d7)	0x8a57 0x943a
+
+// end of 5th 0x---- : 710c-6085	(0x----)	0x6d17-0x603f
+// end of 6th 0x---- : 	7d54-6c46	(0x----)	0x77df-0x68d0
+// end of 7th 0x---- : 	8263-6fd1	(0x----)	0x7e3f-0x6cf9
+// end of 8th 0x---- : 	8b3b-75fc	(0x----)	0x8579-0x7279
+
+// 0 inv block 0x39d3-0x3c27
+// 1 inv block 0x3cad-0x3e6d
+// 2 inv block 0x3f4b-0x40ff
+// 3 inv block 0x412d-0x42cc
+
+// 0 write out buffer start: 0x4357-0x4675
+// 1 write out buffer start: 0x4769-0x49d1
+// 0 write out buffer start: 0x4a6d-0x4caa
+// 0 write out buffer start: 0x4d46-0x4f73
+
+start_time		0x1f40	//	0x1400	//	0x2200	
+stop_time		0x3000	//	0x5000							
+unit 0x0001		//   0x3280 
+
+prefetcher 0
+decoder 0
+allocator 0
+store 0
+store_bus 0
+load 0
+load_bus 0
+csr 0
+
+int 0
+imul 0
+fp 0
+branch 0	// branch unit, stores(decode and store unit)
+
+caches 0
+L0C 0
+L0D 0
+L2 0
+L3 0
+MEM 0
+
+TLB 0
+PAGE_WALK 0
+PAGE_FAULT 0
+EXT_SNOOP 0
+

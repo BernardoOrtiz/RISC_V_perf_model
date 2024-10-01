@@ -1,0 +1,7 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+
+UINT8 cpu_busy[0x100];
+UINT32 funct_list_gp[0x1000];

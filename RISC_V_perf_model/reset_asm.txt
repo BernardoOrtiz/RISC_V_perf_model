@@ -1,0 +1,85 @@
+//	0	// Author: Bernardo Ortiz
+//	1	// bernardo.ortiz.vanderdys@gmail.com
+//	2	// cell: 949/400-5158
+//	3	// addr: 67 Rockwood	Irvine, CA 92614
+//	4	
+//	5	IO_port TLB_code_ctrl 0x10002000
+//	6	IO_port TLB_data_ctrl 0x10002010
+//	7	IO_port TLB_code_L1_addr 0x10002020 // 32b IO location reads to io_port+4
+//	8	IO_port TLB_data_L1_addr 0x10002040 // 32b IO location reads to io_port+4
+//	9	IO_port TLB_code_L2_addr 0x10002060 // 32b IO location reads to io_port+4
+//	10	IO_port TLB_data_L2_addr 0x10002080 // 32b IO location reads to io_port+4
+//	11	
+//	12	IO_port L0C_ctrl 0x100020b0
+//	13	IO_port L0D_ctrl 0x100020c0
+//	14	IO_port L2_ctrl	0x100020d0
+//	15	
+//	16	void reset_handler(){	
+0x0000_00001000 // label: label_reset_handler 
+//	17		sp = (mhartid+1)<<21;// needs to be on 2MB boundaries to be on seperate bank
+0x0000_00001000 csrrci  x5, 0x000, mhartid // 0x0000_00001000 DW 0xf14072f3
+0x0000_00001004 addi x2, x5, 0x001 // 0x0000_00001004 DW 0x0012811b
+0x0000_00001008 slli x2, x2, 0x015 // 0x0000_00001008 DW 0x0151111b
+//	18		mideleg = 0x00000aaa;
+0x0000_0000100c lui  x6, 0x0 // 0x0000_0000100c DW 0x00000337
+0x0000_00001010 andi x6, x6, 0xaaa // 0x0000_00001010 DW 0xaaa3731b
+0x0000_00001014 csrrw  x0, x6, mideleg // 0x0000_00001014 DW 0x30331073
+//	19		medeleg = 0x0000bb00;
+0x0000_00001018 lui  x7, 0xb // 0x0000_00001018 DW 0x0000b3b7
+0x0000_0000101c andi x7, x7, 0xb00 // 0x0000_0000101c DW 0xb003f39b
+0x0000_00001020 csrrw  x0, x7, medeleg // 0x0000_00001020 DW 0x30239073
+//	20		mstatus |= 0xa;// enable interrupts M (8) and S (2)
+0x0000_00001024 csrrsi  x0, 0x00a, mstatus // 0x0000_00001024 DW 0x30056073
+//	21		mtvec = 0x00200000;//32b reg
+0x0000_00001028 lui  x8, 0x200 // 0x0000_00001028 DW 0x00200437
+0x0000_0000102c csrrw  x0, x8, mtvec // 0x0000_0000102c DW 0x30541073
+//	22		stvec = 0x80200000;// OS space direct mapped, not swappable
+0x0000_00001030 lui  x9, 0x80200 // 0x0000_00001030 DW 0x802004b7
+0x0000_00001034 csrrw  x0, x9, stvec // 0x0000_00001034 DW 0x10549073
+//	23	//	msp = mtvec +((mhartid+1)<<21);// avoids recalculating on every page miss - 32b reg
+//	24	//	ssp = stvec +((mhartid+1)<<21);// avoids recalculating on every page miss - 32b reg
+//	25		satp = (0x900000000008C800 | (mhartid<<44));
+0x0000_00001038 lui  x16, 0x90000 // 0x0000_00001038 DW 0x90000837
+0x0000_0000103c slli x15, x16, 0x020 // 0x0000_0000103c DW 0x0208179b
+0x0000_00001040 lui  x17, 0x8c // 0x0000_00001040 DW 0x0008c8b7
+0x0000_00001044 andi x17, x17, 0x800 // 0x0000_00001044 DW 0x8008f89b
+0x0000_00001048 add x15, x15, x17 // 0x0000_00001048 DW 0x011787bb
+0x0000_0000104c csrrci  x19, 0x000, mhartid // 0x0000_0000104c DW 0xf14079f3
+0x0000_00001050 slli x18, x19, 0x02c // 0x0000_00001050 DW 0x02c9991b
+0x0000_00001054 or x14, x18, x15 // 0x0000_00001054 DW 0x00f9673b
+0x0000_00001058 csrrwi  x14, 0x000, satp // 0x0000_00001058 DW 0x18005773
+//	26		TLB_code_ctrl[0] = 1; // enable code TLB
+0x0000_0000105c lui  x20, 0x10002 // 0x0000_0000105c DW 0x10002a37
+0x0000_00001060 addi x21, x0, 0x001 // 0x0000_00001060 DW 0x00100a9b
+0x0000_00001064 sc.d.aq.rl x8, x20, x21 // 0x0000_00001064 DW 0x1f5a342f
+//	27		TLB_data_ctrl[0] = 1; // enable data TLB
+0x0000_00001068 lui  x22, 0x10002 // 0x0000_00001068 DW 0x10002b37
+0x0000_0000106c ori x22, x22, 0x010 // 0x0000_0000106c DW 0x010b6b1b
+0x0000_00001070 addi x23, x0, 0x001 // 0x0000_00001070 DW 0x00100b9b
+0x0000_00001074 sc.d.aq.rl x8, x22, x23 // 0x0000_00001074 DW 0x1f7b342f
+//	28		L0C_ctrl[0] = 1;
+0x0000_00001078 lui  x24, 0x10002 // 0x0000_00001078 DW 0x10002c37
+0x0000_0000107c ori x24, x24, 0x0b0 // 0x0000_0000107c DW 0x0b0c6c1b
+0x0000_00001080 addi x25, x0, 0x001 // 0x0000_00001080 DW 0x00100c9b
+0x0000_00001084 sc.d.aq.rl x8, x24, x25 // 0x0000_00001084 DW 0x1f9c342f
+//	29		L0D_ctrl[0] = 1;
+0x0000_00001088 lui  x26, 0x10002 // 0x0000_00001088 DW 0x10002d37
+0x0000_0000108c ori x26, x26, 0x0c0 // 0x0000_0000108c DW 0x0c0d6d1b
+0x0000_00001090 addi x27, x0, 0x001 // 0x0000_00001090 DW 0x00100d9b
+0x0000_00001094 sc.d.aq.rl x8, x26, x27 // 0x0000_00001094 DW 0x1fbd342f
+//	30		L2_ctrl[0] = 1;
+0x0000_00001098 lui  x28, 0x10002 // 0x0000_00001098 DW 0x10002e37
+0x0000_0000109c ori x28, x28, 0x0d0 // 0x0000_0000109c DW 0x0d0e6e1b
+0x0000_000010a0 addi x29, x0, 0x001 // 0x0000_000010a0 DW 0x00100e9b
+0x0000_000010a4 sc.d.aq.rl x8, x28, x29 // 0x0000_000010a4 DW 0x1fde342f
+//	31		OS_entry(); // OS cacheable, no-swappable 
+0x0000_000010a8 lui  x30, 0x80000 // 0x0000_000010a8 DW 0x80000f37
+0x0000_000010ac jalr x0, x30, 0 // 0x0000_000010ac DW 0x000f0067
+//	32		wfi;
+0x0000_000010b0 wfi // 0x0000_000010b0 DW 0x10500073
+//	33	}
+0x0000_000010b4 fence 0 // normal fence - synch (complete)  all memory instructions// 0x0000_000010b4 DW 0x8000000f
+0x0000_000010b8 jalr x0, x12, 0 // 0x0000_000010b8 DW 0x00060067
+0x0000_000010bc // label: label1_0
+// current depth = 0.0 // minus 1
+0x0000_000010bc fence 0 // normal fence - synch (complete)  all memory instructions// 0x0000_000010bc DW 0x8000000f

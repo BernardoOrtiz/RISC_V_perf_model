@@ -1,0 +1,578 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+
+#include "OS.h"
+using namespace concurrency;
+
+	UINT8 luma_type[0x10] = { 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 , 12 , 13 , 14 , 15 };
+	_fp16 cof[0x100] = { 0x00 , 0x01 , 0x02 , 0x03 , 0x04 , 0x05 , 0x06 , 0x07 , 0x08 , 0x09 , 0x0a , 0x0b , 0x0c , 0x0d , 0x0e , 0x0f ,
+						 0x10 , 0x11 , 0x12 , 0x13 , 0x14 , 0x15 , 0x16 , 0x17 , 0x18 , 0x19 , 0x1a , 0x1b , 0x1c , 0x1d , 0x1e , 0x1f ,
+						 0x20 , 0x21 , 0x22 , 0x23 , 0x24 , 0x25 , 0x26 , 0x27 , 0x28 , 0x29 , 0x2a , 0x2b , 0x2c , 0x2d , 0x2e , 0x2f ,
+						 0x30 , 0x31 , 0x32 , 0x33 , 0x34 , 0x35 , 0x36 , 0x37 , 0x38 , 0x39 , 0x3a , 0x3b , 0x3c , 0x3d , 0x3e , 0x3f ,
+						 0x40 , 0x41 , 0x42 , 0x43 , 0x44 , 0x45 , 0x46 , 0x47 , 0x48 , 0x49 , 0x4a , 0x4b , 0x4c , 0x4d , 0x4e , 0x4f ,
+						 0x50 , 0x51 , 0x52 , 0x53 , 0x54 , 0x55 , 0x56 , 0x57 , 0x58 , 0x59 , 0x5a , 0x5b , 0x5c , 0x5d , 0x5e , 0x5f ,
+						 0x60 , 0x61 , 0x62 , 0x63 , 0x64 , 0x65 , 0x66 , 0x67 , 0x68 , 0x69 , 0x6a , 0x6b , 0x6c , 0x6d , 0x6e , 0x6f ,
+						 0x70 , 0x71 , 0x72 , 0x73 , 0x74 , 0x75 , 0x76 , 0x77 , 0x78 , 0x79 , 0x7a , 0x7b , 0x7c , 0x7d , 0x7e , 0x7f ,
+						 0x80 , 0x81 , 0x82 , 0x83 , 0x84 , 0x85 , 0x86 , 0x87 , 0x88 , 0x89 , 0x8a , 0x8b , 0x8c , 0x8d , 0x8e , 0x8f ,
+						 0x90 , 0x91 , 0x92 , 0x93 , 0x94 , 0x95 , 0x96 , 0x97 , 0x98 , 0x99 , 0x9a , 0x9b , 0x9c , 0x9d , 0x9e , 0x9f ,
+						 0xa0 , 0xa1 , 0xa2 , 0xa3 , 0xa4 , 0xa5 , 0xa6 , 0xa7 , 0xa8 , 0xa9 , 0xaa , 0xab , 0xac , 0xad , 0xae , 0xaf ,
+						 0xb0 , 0xb1 , 0xb2 , 0xb3 , 0xb4 , 0xb5 , 0xb6 , 0xb7 , 0xb8 , 0xb9 , 0xba , 0xbb , 0xbc , 0xbd , 0xbe , 0xbf ,
+						 0xc0 , 0xc1 , 0xc2 , 0xc3 , 0xc4 , 0xc5 , 0xc6 , 0xc7 , 0xc8 , 0xc9 , 0xca , 0xcb , 0xcc , 0xcd , 0xce , 0xcf ,
+						 0xd0 , 0xd1 , 0xd2 , 0xd3 , 0xd4 , 0xd5 , 0xd6 , 0xd7 , 0xd8 , 0xd9 , 0xda , 0xdb , 0xdc , 0xdd , 0xde , 0xdf ,
+						 0xe0 , 0xe1 , 0xe2 , 0xe3 , 0xe4 , 0xe5 , 0xe6 , 0xe7 , 0xe8 , 0xe9 , 0xea , 0xeb , 0xec , 0xed , 0xee , 0xef ,
+						 0xf0 , 0xf1 , 0xf2 , 0xf3 , 0xf4 , 0xf5 , 0xf6 , 0xf7 , 0xf8 , 0xf9 , 0xfa , 0xfb , 0xfc , 0xfd , 0xfe , 0xff };
+
+	INT8 mvx0[4] = {- 8, - 8, - 16, - 16};
+	INT8 mvx1[4] = {- 7, - 7, - 15, - 15};
+	INT8 mvx2[4] = {- 6, - 6, - 14, - 14};
+	INT8 mvx3[4] = {- 5, - 5, - 13, - 13};
+	INT8 mvx4[4] = {- 4, - 4, - 12, - 12};
+	INT8 mvx5[4] = {- 3, - 3, - 11, - 11};
+	INT8 mvx6[4] = {- 2, - 2, - 10, - 10};
+	INT8 mvx7[4] = {- 1, - 1, - 9, - 9};
+	INT8 mvy[4] = {- 8, - 16, - 8, - 16};
+	INT8 mvy7[4] = { 7 , 15 , 7 , 15 };
+	INT8 mvy6[4] = { 6 , 14 , 6 , 14 };
+	INT8 mvy5[4] = { 5 , 13 , 5 , 13 };
+	INT8 mvy4[4] = { 4 , 12 , 4 , 12 };
+	INT8 mvy3[4] = { 3 , 11 , 3 , 11 };
+	INT8 mvy2[4] = { 2 , 10 , 2 , 10 };
+	INT8 mvy1[4] = { 1 , 9 , 1 , 9 };
+	INT8 mvy0[4] = { 0 , 8 , 0 , 8 };
+
+_fp16 *in1 = (_fp16 *)malloc(0x800000 * sizeof(_fp16));
+_fp16 *in2 = (_fp16 *)malloc(0x800000 * sizeof(_fp16));
+_fp16 *out = (_fp16 *)malloc(0x800000 * sizeof(_fp16));
+
+void get_luma(UINT8 luma_type, _fp16 *out, _fp16 *in, UINT16 x, UINT16 y){
+	switch(luma_type){
+	case 0 :
+{ 
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					out[(j<< 3)+ i] = in[((y+ j)<< 12)+ x+ i];
+				}
+			}
+		} 
+		break;
+	case 1 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(0.5*(out_reg + in[((y+ j)<< 12)+ x+ i]));
+				}
+			}
+		} 
+		break;
+	case 2 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(out_reg);
+				}
+			}
+		} 
+		break;
+	case 3 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(0.5*(out_reg + in[((y+ j)<< 12) + x + i + 0x1000]));
+				}
+			}
+		} 
+		break;
+	case 4 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(0.5*(out_reg + in[((y+ j)<< 12)+ x+ i+ 1]));
+				}
+			}
+		} 
+		break;
+	case 5 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp11 = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					temp11 = max(temp11,0);
+					temp11 = min(temp11,0xff);
+					_fp16 temp11_2 = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					temp11_2 = max(temp11_2,fzero);
+					temp11_2 = min(temp11_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp11 + temp11_2));
+				}
+			}
+		} 
+		break;
+	case 6 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				_fp16 temp12[13];
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					temp12[i] = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+				}
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp12_2 = temp12[i]+ temp12[+ 5] - 5* (temp12[i+ 1]+ temp12[+ 4])+ 20* (temp12[i+ 2]+ temp12[+ 3]);
+					temp12_2 = max(temp12_2,fzero);
+					_fp16 temp123 = min(temp12_2,fmax);
+					temp12_2 = round(0.03125*(temp12[i+ 2]);
+					temp12_2 = max(temp12_2,fzero);
+					temp12_2 = min(temp12_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp123 + temp12_2));
+				}
+			}
+		} 
+		break;
+	case 7 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp13 = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					temp13 = round(0.03125*temp13);
+					temp13 = max(temp13,fzero);
+					temp13 = min(temp13,0fmax);
+					_fp16 temp13_2 = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					temp13_2 = round(0.03125*temp13_2);
+					temp13_2 = max(temp13_2,fzero);
+					temp13_2 = min(temp13_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp13 + temp13_2));
+				}
+			}
+		} 
+		break;
+	case 8 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(out_reg);
+				}
+			}
+		} 
+		break;
+	case 9 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			_fp16 temp21[0x80];
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					_fp16 temp21_1 = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+					temp21_1 = max(temp21_1,fzero);
+					temp21[(j<< 4)+ i] = min(temp21_1,fmax);
+				}
+			}
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp21_2 = temp21[(j<< 4)+ i]+ temp21[(j<< 4)+ i+ 5] - 5* (temp21[(j<< 4)+ i+ 1]+ temp21[(j<< 4)+ i+ 4])+ 20* (temp21[(j<< 4)+ i+ 2]+ temp21[(j<< 4)+ i+ 3]);
+					temp21_2 = max(temp21_2,fzero);
+					temp21_2 = min(temp21_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(((temp21[(j<< 4)+ i]+ 0x10)*0.03125)+ temp21_2));
+				}
+			}
+		} 
+		break;
+	case 10 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			_fp16 temp22[0x80];
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					temp22[(j<< 4)+ i] = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+				}
+			}
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp22_2 = temp22[(j<< 4)+ i]+ temp22[(j<< 4) + i + 0x50] - 5* (temp22[(j<< 4) + i + 0x10]+ temp22[(j<< 4) + i + 0x40])+ 20* (temp22[(j<< 4) + i + 0x20]+ temp22[(j<< 4) + i + 0x30]);
+					temp22_2 = max(temp22_2,fzero);
+					temp22_2 = min(temp22_2,fmax);
+					out[(j<< 3)+ i] = round(out[(j<< 3)+ i]);
+				}
+			}
+		} 
+		break;
+	case 11 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			_fp16 temp23[0x80];
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					temp23[(j<< 4)+ i] = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+				}
+			}
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp23_2 = temp23[(j<< 4)+ i]+ temp23[(j<< 4) + i + 0x50] - 5* (temp23[(j<< 4) + i + 0x10]+ temp23[(j<< 4) + i + 0x40])+ 20* (temp23[(j<< 4) + i + 0x20]+ temp23[(j<< 4) + i + 0x30]);
+					temp23_2 = (temp23_2+ 0x200)>> 10 ;
+					temp23_2 = max(temp23_2,fzero);
+					_fp16 temp23_3 = min(temp23_2,fmax);
+					temp23_2 = round(0.03125*in[((y+ j)<< 12) + x + i + 0x3000]);
+					temp23_2 = max(temp23_2,fzero);
+					temp23_2 = min(temp23_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp23_3 + temp23_2));
+				}
+			}
+		} 
+		break;
+	case 12 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 out_reg = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					out_reg = max(out_reg,fzero);
+					out_reg = min(out_reg,fmax);
+					out[(j<< 3)+ i] = round(0.5*(out_reg + in[((y+ j)<< 12)+ x+ i+ 1]));
+				}
+			}
+		} 
+		break;
+	case 13 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			_fp16 temp31[0x80];
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					_fp16 temp31_reg = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					temp31_reg = round(.03125*temp31_reg);
+					temp31_reg = max(temp31_reg,fzero);
+					temp31[(j<< 4)+ i] = min(temp31_reg,fmax);
+				}
+			}
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp31_2 = temp31[(j<< 4)+ i]+ temp31[(j<< 4) + i + 0x50] - 5* (temp31[(j<< 4) + i + 0x10]+ temp31[(j<< 4) + i + 0x40])+ 20* (temp31[(j<< 4) + i + 0x20]+ temp31[(j<< 4) + i + 0x30]);
+					temp31_2 = round(0.03125*temp31_2);
+					temp31_2 = max(temp31_2,fzero);
+					temp31_2 = min(temp31_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp31[(j<< 4)+ i]+ temp31_2));
+				}
+			}
+		} 
+		break;
+	case 14 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				_fp16 temp32[0x10];
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					temp32[i] = in[((y+ j)<< 12) + x + i - 0x2000]+ in[((y+ j)<< 12) + x + i + 0x3000] - 5* (in[((y+ j)<< 12) + x + i - 0x1000]+ in[((y+ j)<< 12) + x + i + 0x2000])+ 20* (in[((y+ j)<< 12) + x+ i]+ in[((y+ j)<< 12) + x + i + 0x1000]);
+				}
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp32_2 = temp32[i]+ temp32[+ 5] - 5* (temp32[i+ 1]+ temp32[+ 4])+ 20* (temp32[i+ 2]+ temp32[+ 1]);
+					temp32_2 = (temp32_2+ 0x200)*0.000976563;	
+					temp32_2 = max(temp32_2,fzero);
+					_fp16 temp32_3 = min(temp32_2,fmax);
+					temp32_2 = round(0.03125*in[((y+ j)<< 12)+ x+ i+ 3]);
+					out[(j<< 3)+ i] = round(0.5*(temp32_3+ temp32_2));
+				}
+			}
+		} 
+		break;
+	case 15 :
+{ 
+			_fp16 fzero = 0.0;
+			_fp16 fmax = 255.0;
+			_fp16 temp33[0x80];
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 0xd ; i++){
+					_fp16 temp33_reg = in[((y+ j)<< 12)+ x+ i - 2]+ in[((y+ j)<< 12)+ x+ i+ 3] - 5* (in[((y+ j)<< 12)+ x+ i - 1]+ in[((y+ j)<< 12)+ x+ i+ 2])+ 20* (in[((y+ j)<< 12)+ x+ i]+ in[((y+ j)<< 12)+ x+ i+ 1]);
+					temp33_reg = round(0.03125*temp33_reg);
+					temp33_reg = max(temp33_reg,fzero);
+					temp33[(j<< 4)+ i] = min(temp33_reg,fmax);
+				}
+			}
+			for (UINT8 j= 0 ; j< 8 ; j++){
+				for (UINT8 i= 0 ; i< 8 ; i++){
+					_fp16 temp33_2 = temp33[(j<< 4)+ i]+ temp33[(j<< 4) + i + 0x50] - 5* (temp33[(j<< 4) + i + 0x10]+ temp33[(j<< 4) + i + 0x40])+ 20* (temp33[(j<< 4) + i + 0x20]+ temp33[(j<< 4) + i + 0x30]);
+					temp33_2 = round(0.03125*temp33_2);
+					temp33_2 = max(temp33_2,fzero);
+					temp33_2 = min(temp33_2,fmax);
+					out[(j<< 3)+ i] = round(0.5*(temp33[(j<< 4)+ i]+ temp33_2));
+				}
+			}
+		} 
+		break;
+	default:
+		break;
+	}
+}
+// origin offset (16,16)
+void p_frame_mb(_fp16 *out, _fp16 *in, UINT16 x, UINT16 y, UINT8 luma_index, INT8 *mvx, INT8 *mvy, UINT8 *luma_type){	
+	get_luma(luma_type[luma_index], out, in, x + mvx[0] + 8, y + mvy[0]+ 8);
+	get_luma(luma_type[luma_index + 1], out, in, x + mvx[1]+ 16, y + mvy[1]+ 16);
+	get_luma(luma_type[luma_index + 2], out, in, x + mvx[2]+ 8, y + mvy[2]+ 24);
+	get_luma(luma_type[luma_index + 3], out, in, x + mvx[3]+ 16, y + mvy[3]+ 32);
+}
+void inverse8x8(_fp16 *block, _fp16 *in, UINT16 off_x, UINT16 off_y){
+	_fp16 tmp[64];
+	_fp16 fc0_5 = 0.5;
+	_fp16 fc0_25 = 0.25;
+//	_fp16 *in_ptr = &in[((off_y) << 4) | (off_x)];
+	void *in_ptr_v = &in[(off_y<< 4)| off_x];
+	UINT128 *in_ptr_i = in_ptr_v;
+	UINT128 in_ptr_i2;
+	for (int i = 0 ; i < 8 ; i++){// Horizontal 
+			_fp16 a_0;
+			_fp16 a_1;
+			_fp16 a_2;
+			_fp16 a_3;
+			_fp16 b_0;
+			_fp16 b_1;
+			_fp16 b_2;
+			_fp16 b_3;
+			_fp16 b_4;
+			_fp16 b_5;
+			_fp16 b_6;
+			_fp16 b_7;
+			_fp16 p_0;
+			_fp16 p_1;
+			_fp16 p_2;
+			_fp16 p_3;
+			_fp16 p_4;
+			_fp16 p_5;
+			_fp16 p_6;
+			_fp16 p_7;
+		in_ptr_i2 = in_ptr_i[i];
+//		p_0 = in_ptr[(i << 4) | 0];
+//		p_1 = in_ptr[(i << 4) | 1];
+//		p_2 = in_ptr[(i << 4) | 2];
+//		p_3 = in_ptr[(i << 4) | 3];
+//		p_4 = in_ptr[(i << 4) | 4];
+//		p_5 = in_ptr[(i << 4) | 5];
+//		p_6 = in_ptr[(i << 4) | 6];
+//		p_7 = in_ptr[(i << 4) | 7];
+		short in_ptr_i3 = in_ptr_i2;
+		void *in_ptr_v3 = in_ptr_i3;
+		p_0 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 16 ;
+		p_1 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 32 ;
+		p_2 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 48 ;
+		p_3 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 64 ;
+		p_4 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 80 ;
+		p_5 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 96 ;
+		p_6 = (_fp16)in_ptr_v3;
+		in_ptr_i3 = in_ptr_i2>> 112 ;
+		p_7 = (_fp16)in_ptr_v3;
+
+		a_0 = p_0 + p_4;
+		a_1 = p_0 - p_4 ;
+		a_2 = p_6 - fc0_5 *p_2;
+		a_3 = p_2 + fc0_5*p_6;
+
+		b_0 = a_0 + a_3;
+		b_2 = a_1 - a_2 ;
+		b_4 = a_1 + a_2;
+		b_6 = a_0 - a_3 ;
+
+		a_0 = p_5 - p_3 - p_7 - fc0_5 *p_7;
+		a_1 = p_1 + p_7 - p_3 - fc0_5 *p_3;
+		a_2 = p_7 + p_5 - p_1 + fc0_5*p_5;
+		a_3 = p_3 + p_5 + p_1 + fc0_5*p_1;
+
+		b_1 = a_0 + (a_3 * fc0_25);
+		b_3 = a_1 + (a_2 * fc0_25);
+		b_5 = a_2 - (a_1 * fc0_25);
+		b_7 = a_3 - (a_0 * fc0_25);
+
+		tmp[(i<< 3)] = b_0 + b_7;
+		tmp[(i<< 3)+ 1] = b_2 - b_5 ;
+		tmp[(i<< 3)+ 2] = b_4 + b_3;
+		tmp[(i<< 3)+ 3] = b_6 + b_1;
+		tmp[(i<< 3)+ 4] = b_6 - b_1 ;
+		tmp[(i<< 3)+ 5] = b_4 - b_3 ;
+		tmp[(i<< 3)+ 6] = b_2 + b_5;
+		tmp[(i<< 3)+ 7] = b_0 - b_7 ;
+	}
+	_fp16 *out = &block[(off_y<< 4)+ off_x];
+	for (int i = 0 ; i < 8 ; i++){//  Vertical
+				_fp16 a_0;
+				_fp16 a_1;
+				_fp16 a_2;
+				_fp16 a_3;
+				_fp16 b_0;
+				_fp16 b_1;
+				_fp16 b_2;
+				_fp16 b_3;
+				_fp16 b_4;
+				_fp16 b_5;
+				_fp16 b_6;
+				_fp16 b_7;
+				_fp16 p_0;
+				_fp16 p_1;
+				_fp16 p_2;
+				_fp16 p_3;
+				_fp16 p_4;
+				_fp16 p_5;
+				_fp16 p_6;
+				_fp16 p_7;
+		p_0 = tmp[i];
+		p_1 = tmp[i + 0x08];
+		p_2 = tmp[i + 0x10];
+		p_3 = tmp[i + 0x18];
+		p_4 = tmp[i + 0x20];
+		p_5 = tmp[i + 0x28];
+		p_6 = tmp[i + 0x30];
+		p_7 = tmp[i + 0x38];
+
+		a_0 = p_0 + p_4;
+		a_1 = p_0 - p_4 ;
+		a_2 = p_6 - fc0_5 *p_2;
+		a_3 = p_2 + fc0_5*p_6;
+
+		b_0 = a_0 + a_3;
+		b_2 = a_1 - a_2 ;
+		b_4 = a_1 + a_2;
+		b_6 = a_0 - a_3 ;
+
+		a_0 = p_5 - p_3 - p_7 - fc0_5 *p_7;
+		a_1 = p_1 + p_7 - p_3 - fc0_5 *p_3;
+		a_2 = p_7 + p_5 - p_1 + fc0_5*p_5;
+		a_3 = p_3 + p_5 + p_1 + fc0_5*p_1;
+
+		b_1 = a_0 + (a_3 * fc0_25);
+		b_7 = a_3 - (a_0 * fc0_25);
+		b_3 = a_1 + (a_2 * fc0_25);
+		b_5 = a_2 - (a_1 * fc0_25);
+
+		out[i] = b_0 + b_7;
+		out[i + 0x10] = b_2 - b_5 ;
+		out[i + 0x20] = b_4 + b_3;
+		out[i + 0x30] = b_6 + b_1;
+		out[i + 0x40] = b_6 - b_1 ;
+		out[i + 0x50] = b_4 - b_3 ;
+		out[i + 0x60] = b_2 + b_5;
+		out[i + 0x70] = b_0 - b_7 ;
+	}
+}
+void write_out_buffer(_fp16 *out, _fp16 *pred, _fp16 *cof_bar, UINT16 x, UINT16 y, UINT16 off_x, UINT16 off_y){
+	_fp16 temp;
+	_fp16 fzero = 0.0;
+	_fp16 fmax = 255.0;
+	_fp16 fconst = 0.015625;
+	void *pred_v = &pred[(off_y << 4)| off_x]; // copy address
+	UINT128 *pred_i = pred_v;
+
+	void *cof_bar_v = &cof_bar[(off_y << 4)| off_x]; // copy address
+	UINT128 *cof_bar_i = cof_bar_v;
+	for (int j = 0 ; j < 8 ; j++){
+		UINT128 pred_i2 = pred_i[j<< 1];
+		UINT128 cof_bar_i2 = cof_bar_i[j<< 1];
+		for (int i = 0 ; i < 8 ; i++){
+//			temp = pred[((off_y | j) << 4) | (off_x | i)] + fconst*cof_bar[((off_y | j)<<4)|off_x | i];
+			short pred_i3 = (pred_i2 >> (i*16));
+			void *pred_v3 = pred_i3;
+			short cof_bar_i3 = (cof_bar_i2 >> (i*16));
+			void *cof_bar_v3 = cof_bar_i3;
+			temp = (_fp16)pred_v3 + fconst*((_fp16)cof_bar_v3);
+			temp = max(temp,fzero);
+			temp = min(temp,fmax);
+			out[((y | off_y | j)<< 12)| (x | off_x| i)] = round(temp);
+		}
+	}
+}
+void p_frame(_fp16 *out, _fp16 *in, UINT x_offset, UINT y_offset,INT8 *mvx, INT8 *mvy, _fp16 *cof, UINT8 *luma_type, UINT8 luma_index){
+	_fp16 pred[0x100];
+	_fp16 cof_bar[0x100];
+	for (UINT16 y= y_offset + 0x10; y< y_offset + 0x410; y+=0x10){// 1080P, 4 slices
+		for (UINT16 x= x_offset + 0x10; x< x_offset + 0x30 ; x+=0x10){
+			p_frame_mb(pred, in, x, y, luma_index, mvx, mvy, luma_type);
+
+			inverse8x8(cof_bar,cof, 0 ,0);
+			inverse8x8(cof_bar,cof, 0 ,8);
+			inverse8x8(cof_bar,cof, 8 ,0);
+			inverse8x8(cof_bar,cof, 8 ,8);
+			write_out_buffer(out, pred, cof_bar, x, y, 0 ,0);
+			write_out_buffer(out, pred, cof_bar, x, y, 0 ,8);
+			write_out_buffer(out, pred, cof_bar, x, y, 8 ,0);
+			write_out_buffer(out, pred, cof_bar, x, y, 8 ,8);
+			luma_index = ((luma_index+ 4)&0x0f);
+		}
+	}
+}
+void b_frame(_fp16 *out, _fp16 *in1, _fp16 *in2, UINT x_offset, UINT y_offset, INT8 *mvx1, INT8 *mvy1, INT8 *mvx2, INT8 *mvy2, _fp16 *cof, UINT8 *luma_type, UINT8 luma_index0, UINT8 luma_index1){
+	_fp16 pred1[0x100];
+	_fp16 pred2[0x100];
+	_fp16 cof_bar[0x100];
+	for (UINT16 y= y_offset + 0x10; y< y_offset + 0x410; y+=0x10){// 1080P, 4 slices
+		for (UINT16 x= x_offset + 0x10; x< x_offset + 0x30 ; x+=0x10){
+			p_frame_mb(pred1, in1, x, y, luma_index0, mvx1, mvy1, luma_type);
+			p_frame_mb(pred2, in2, x, y, luma_index1, mvx2, mvy2, luma_type);
+			for (UINT l= 0 ; l< 0x100 ;l++){
+				pred1[l] = 0.25*(pred1[l] + 3* pred2[l]);
+			}
+		
+			inverse8x8(cof_bar,cof, 0 ,0);
+			inverse8x8(cof_bar,cof, 0 ,8);
+			inverse8x8(cof_bar,cof, 8 ,0);
+			inverse8x8(cof_bar,cof, 8 ,8);
+			write_out_buffer(out, pred1, cof_bar, x, y, 0 ,0);
+			write_out_buffer(out, pred1, cof_bar, x, y, 0 ,8);
+			write_out_buffer(out, pred1, cof_bar, x, y, 8 ,0);
+			write_out_buffer(out, pred1, cof_bar, x, y, 8 ,8);
+			luma_index0 = ((luma_index0+ 4)&0x0f);
+			luma_index1 = ((luma_index1+ 4)&0x0f);
+		}
+	}
+}
+
+void main(){
+	parallel_invoke(// (tp): ra, gp, sp, tp, argc, argp
+		[&]{	p_frame(out, in1, 0 , 0x00000 , mvx0, mvy, cof, luma_type, 0);	}//name, ptr, argc, argp
+		[&]{	p_frame(out, in1, 0 , 0x00200 , mvx1, mvy1, cof, luma_type, 0);	}//name, ptr, argc, argp
+		[&]{	p_frame(out, in1, 0 , 0x00400 , mvx6, mvy6, cof, luma_type, 0);	}//name, ptr, argc, argp
+		[&]{	p_frame(out, in1, 0 , 0x00600 , mvx7, mvy5, cof, luma_type, 0);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in1, in2, 0 , 0x00000 , mvx0, mvy, mvx1, mvy, cof, luma_type, 4 ,8);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in1, in2, 0 , 0x00200 , mvx2, mvy7, mvx3, mvy6, cof, luma_type, 4 ,8);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in1, in2, 0 , 0x00400 , mvx4, mvy5, mvx5, mvy4, cof, luma_type, 4 ,8);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in1, in2, 0 , 0x00600 , mvx6, mvy3, mvx7, mvy2, cof, luma_type, 4 ,8);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in2, in1, 0 , 0x00000 , mvx0, mvy, mvx1, mvy, cof, luma_type, 12 ,0);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in2, in1, 0 , 0x00200 , mvx2, mvy1, mvx3, mvy0, cof, luma_type, 12 ,0);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in2, in1, 0 , 0x00400 , mvx4, mvy7, mvx5, mvy6, cof, luma_type, 12 ,0);	}//name, ptr, argc, argp
+		[&]{	b_frame(out, in2, in1, 0 , 0x00600 , mvx5, mvy5, mvx7, mvy4, cof, luma_type, 12 ,0);	}//name, ptr, argc, argp
+	);// ecall(mhartid);
+}

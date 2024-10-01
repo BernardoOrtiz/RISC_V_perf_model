@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{ee1c0517-3995-451c-b75c-063a36c7cd43}</ProjectGuid>
+    <RootNamespace>RISCVperfmodel</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="allocate_unit.cpp" />
+    <ClCompile Include="Array16toReg128.cpp" />
+    <ClCompile Include="bracket_reduction.cpp" />
+    <ClCompile Include="branch.cpp" />
+    <ClCompile Include="cL0.cpp" />
+    <ClCompile Include="clear_constants.cpp" />
+    <ClCompile Include="cTLB.cpp" />
+    <ClCompile Include="cull_branches.cpp" />
+    <ClCompile Include="Declare_multi2singe.cpp" />
+    <ClCompile Include="decode32.cpp" />
+    <ClCompile Include="decode_32b.cpp" />
+    <ClCompile Include="decode_48b.cpp" />
+    <ClCompile Include="dL0.cpp" />
+    <ClCompile Include="dTLB.cpp" />
+    <ClCompile Include="format.cpp" />
+    <ClCompile Include="FuncCall_const_ellimination.cpp" />
+    <ClCompile Include="FunctCall_of_FunctCall_ellimination.cpp" />
+    <ClCompile Include="inline_C.cpp" />
+    <ClCompile Include="Internal_bus.cpp" />
+    <ClCompile Include="interruptExceptionHandler.txt" />
+    <ClCompile Include="L2.cpp" />
+    <ClCompile Include="L3.cpp" />
+    <ClCompile Include="load.cpp" />
+    <ClCompile Include="load_params.cpp" />
+    <ClCompile Include="marked_inline.cpp" />
+    <ClCompile Include="math_reduction.cpp" />
+    <ClCompile Include="memory_abstract.cpp" />
+    <ClCompile Include="memory_allocate.cpp" />
+    <ClCompile Include="memory_model.cpp" />
+    <ClCompile Include="nonaligned_load128_preload.cpp" />
+    <ClCompile Include="OP_FP_unit.cpp" />
+    <ClCompile Include="OP_unit.cpp" />
+    <ClCompile Include="parenthesis_reduction.cpp" />
+    <ClCompile Include="prefetcher.cpp" />
+    <ClCompile Include="reg_unit.cpp" />
+    <ClCompile Include="retire.cpp" />
+    <ClCompile Include="RISC_V_asm.cpp" />
+    <ClCompile Include="RISC_V_Masm.cpp" />
+    <ClCompile Include="RISC_V_perf_model.cpp" />
+    <ClCompile Include="ScalarPtrEllimination.cpp" />
+    <ClCompile Include="split_line.cpp" />
+    <ClCompile Include="sTLB.cpp" />
+    <ClCompile Include="store_amo.cpp" />
+    <ClCompile Include="store_load_ellimination.cpp" />
+    <ClCompile Include="switch_fill.cpp" />
+    <ClCompile Include="SYSTEM_MAP_unit.cpp" />
+    <ClCompile Include="VarDeclarationEllimation4loop.cpp" />
+    <ClCompile Include="VariableSubstitution.cpp" />
+    <ClCompile Include="var_base_index_inner_loop.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cache.h" />
+    <ClInclude Include="compile_to_RISC_V.h" />
+    <ClInclude Include="internal_bus.h" />
+    <ClInclude Include="memory_abstract.h" />
+    <ClInclude Include="memory_model.h" />
+    <ClInclude Include="front_end.h" />
+    <ClInclude Include="ROB.h" />
+    <ClInclude Include="TLB.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="array16toreg128.txt" />
+    <Text Include="clean.txt" />
+    <Text Include="clean2.txt" />
+    <Text Include="clean3_handler.txt" />
+    <Text Include="clean4.txt" />
+    <Text Include="clear.txt" />
+    <Text Include="culled_branches.txt" />
+    <Text Include="culled_branches2.txt" />
+    <Text Include="declare_m2s.txt" />
+    <Text Include="inline.txt" />
+    <Text Include="inline2.txt" />
+    <Text Include="inline3.txt" />
+    <Text Include="inline4.txt" />
+    <Text Include="malloc.txt" />
+    <Text Include="marked_inline.txt" />
+    <Text Include="math_reduct.txt" />
+    <Text Include="math_reduct2.txt" />
+    <Text Include="math_reduct3.txt" />
+    <Text Include="math_reduct4.txt" />
+    <Text Include="math_reduct5.txt" />
+    <Text Include="math_reduct_h.txt" />
+    <Text Include="M_handlers_Masm.txt" />
+    <Text Include="Notes.txt" />
+    <Text Include="OS.txt" />
+    <Text Include="OS128_h.txt" />
+    <Text Include="OS32_h.txt" />
+    <Text Include="OS_asm.txt" />
+    <Text Include="OS64_h.txt" />
+    <Text Include="OS_h_Masm.txt" />
+    <Text Include="OS_Masm.txt" />
+    <Text Include="params.txt" />
+    <Text Include="READ_ME.txt" />
+    <Text Include="reset.txt" />
+    <Text Include="reset_asm.txt" />
+    <Text Include="reset_Masm.txt" />
+    <Text Include="RISC_V_events.txt" />
+    <Text Include="scaler_ptr.txt" />
+    <Text Include="split.txt" />
+    <Text Include="store_load.txt" />
+    <Text Include="S_handlers_asm.txt" />
+    <Text Include="S_handlers_Masm.txt" />
+    <Text Include="varDeclarationEllimination.txt" />
+    <Text Include="var_index_base.txt" />
+    <Text Include="var_substitution.txt" />
+    <Text Include="v_decode.txt" />
+    <Text Include="v_decode_asm.txt" />
+    <Text Include="v_decode_Masm.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

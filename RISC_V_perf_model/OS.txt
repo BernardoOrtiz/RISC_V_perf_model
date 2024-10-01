@@ -1,0 +1,30 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+
+#include "OS.h"
+
+void OS_entry(){ // OS_BASE = 0x80000000 always
+	tp = 0x086300000 - (mhartid<<21);
+	tp[0] = 0;
+	if (mhartid == 0){// hardwired boot sequence, direct to main program
+		reg a0, a1, a2, a3; // declare that these registers will be addressed directly
+		for (UINT i=0;i<0x100; i++){
+			cpu_busy[i] = 0;
+		}
+		for (UINT i=0x10;i<0x1000; i++){
+			funct_list_gp[i] = 0;
+		}
+		a0 = funct_list_gp[0x08]; // load arguments
+		a1 = funct_list_gp[0x09];
+		a2 = funct_list_gp[0x0a];
+		a3 = funct_list_gp[0x0b];
+
+		cpu_busy[0] = 1; // mark CPU 0 as busy
+		sp = 0x100000000 - (mhartid<<21);
+		gp = 0x0f0000000;
+		goto funct_list_gp[0x01]; // load main program 
+	}
+	wfi;
+}

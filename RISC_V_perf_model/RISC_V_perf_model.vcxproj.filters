@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\compiler">
+      <UniqueIdentifier>{bf2d7264-c29a-49a4-a28e-0bdb68ba3803}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pre_compile">
+      <UniqueIdentifier>{076e2a1d-69ec-4d8b-bb15-9f228018bad7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\output">
+      <UniqueIdentifier>{28ce32c0-eb9c-42dc-b6f2-50e528b5470d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Masm">
+      <UniqueIdentifier>{c3a437bd-e00f-4751-8ecc-930446bfcedc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\src">
+      <UniqueIdentifier>{5fea0f37-9345-41ed-bc9c-17219bfea533}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RISC_V_perf_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Internal_bus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="load_params.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_abstract.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="allocate_unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dTLB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dL0.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="store_amo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="load.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="reg_unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OP_unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OP_FP_unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SYSTEM_MAP_unit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="retire.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="branch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="decode32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cTLB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cL0.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="prefetcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="L2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="L3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sTLB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="memory_allocate.cpp">
+      <Filter>Source Files\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="inline_C.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="FuncCall_const_ellimination.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="marked_inline.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Declare_multi2singe.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="parenthesis_reduction.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="bracket_reduction.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="split_line.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Array16toReg128.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="ScalarPtrEllimination.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="clear_constants.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="math_reduction.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="cull_branches.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="var_base_index_inner_loop.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="VarDeclarationEllimation4loop.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="format.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="VariableSubstitution.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="interruptExceptionHandler.txt">
+      <Filter>Resource Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="RISC_V_Masm.cpp">
+      <Filter>Source Files\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="RISC_V_asm.cpp">
+      <Filter>Source Files\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="FunctCall_of_FunctCall_ellimination.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="store_load_ellimination.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="switch_fill.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="nonaligned_load128_preload.cpp">
+      <Filter>Source Files\pre_compile</Filter>
+    </ClCompile>
+    <ClCompile Include="decode_32b.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="decode_48b.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="compile_to_RISC_V.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="internal_bus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ROB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TLB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="front_end.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_abstract.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="clean3_handler.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="clear.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="culled_branches.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="inline.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="math_reduct_h.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="split.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="clean.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="culled_branches2.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="OS_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="S_handlers_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="v_decode_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="malloc.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="declare_m2s.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="OS.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="OS64_h.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="params.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="reset.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="v_decode.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="RISC_V_events.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Notes.txt" />
+    <Text Include="reset_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="var_index_base.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="OS_asm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="v_decode_asm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="reset_asm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="S_handlers_asm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="inline3.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="inline4.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="math_reduct5.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="math_reduct2.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="marked_inline.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="math_reduct.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="clean2.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="M_handlers_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="math_reduct4.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="math_reduct3.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="array16toreg128.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="varDeclarationEllimination.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="var_substitution.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="scaler_ptr.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="inline2.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="store_load.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="clean4.txt">
+      <Filter>Resource Files\output</Filter>
+    </Text>
+    <Text Include="OS_h_Masm.txt">
+      <Filter>Resource Files\Masm</Filter>
+    </Text>
+    <Text Include="OS32_h.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="OS128_h.txt">
+      <Filter>Resource Files\src</Filter>
+    </Text>
+    <Text Include="READ_ME.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

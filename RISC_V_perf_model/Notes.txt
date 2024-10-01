@@ -1,0 +1,63 @@
+// Author: Bernardo Ortiz
+// bernardo.ortiz.vanderdys@gmail.com
+// cell: 949/400-5158
+// addr: 67 Rockwood	Irvine, CA 92614
+
+* implement first 48b address loads, 21b (2MB page) jump support
+	-> then incorporate SIMD support
+		@ include saturation mode versus overflow for AI support
+		@ do not use config or fast config - too slow
+* implement 64b addr / 30b ( 1GB page support) 
+		@ server & super-computer environment support (multi-node support)
+* implement 64b+ addr support
+	-> 128b int for address generation
+	-> 128b fp for modern FFT support ( European weather model)
+		@ need to go lower in the addressing department for mini-super computer
+
+* implement decode portion of video algorithm, use as model of int AI
+	=> int AI defining as statistical modeling of yes/no decision
+	=> fp AI defining as bayesin predictive model
+		* windowing best line fit, extrapolate to the future
+		* statical evaluation of variables to determine dependencies
+			# uses stats curve multiplication (Schrodingers eq)
+
+* spacing between branches is too short, don't assume misspredicted branch goes to 
+	L1 cache, 2-stage decoder (size- redirecting, decode)
+	=> 4 clocks * decode width == branch taken bubble
+		* spacing needs to be greater to make branch prediction worthwhile,
+			miss-prediction is in the queue otherwise
+
+* control registers / performance counters need to be cleaned up
+	-> limiting visibility of control registers helps prevent quick dirty fixes (cheating) 
+		in getting model to work. Doing this the model is working in an unrealistic fashion, 
+		yielding incorrect, missleading results, which must always be avoided.
+	-> performance models is the art of abstracting the architecture enough to give quick results,
+		complex enough to be useable reults, and be easily scalable to test alternate implementations.
+
+* inline p_frame_mb (function of function calls)
+* use sp in OS and ecall from supervisor
+	-> need to add registers which make stack (and heap) non swappable
+* use 128b reg when zeroing memory regardless of record size (align to 128b)
+* use 128b register to load 8b data, shift to get the "correct" byte out
+
+
+** too many loads, need to switch to 128b UINT loads + shift or SIMD
+	* SIMD requires alignment - needs aligning code in (128b UINT loads + shift)
+
+@@@ add SIMD first
+	-> only defined to 128! need 4-64b minimum std (256b)
+		* reg limited 256b int to load SIMD unit
+	-> weather has moved to 128b-fp	(512b)
+		* reg limited 512b int to load SIMD unit
+			32b			48b		64b
+	base	2 (4)		6b		7b
+	size	3			4(5)	4(5)
+	v_gran	0			4(5)	4(5)
+
+	growth	0			9(11)	10(11)
+
+
+!! need to convert code buffer from prefetcher to 16b blocks from 32b blocks in preparation for 48b decoding
+
+seperate out performance counters in decoder, then elliminate all ref to csr registers, move to execution units
+JALR has reg access, this is wrong, need to push out to exec unit (branch unit, not int unit)

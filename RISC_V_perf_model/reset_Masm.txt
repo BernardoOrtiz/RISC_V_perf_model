@@ -1,0 +1,89 @@
+//	0	// Author: Bernardo Ortiz
+//	1	// bernardo.ortiz.vanderdys@gmail.com
+//	2	// cell: 949/400-5158
+//	3	// addr: 67 Rockwood	Irvine, CA 92614
+//	4	
+//	5	IO_port TLB_code_ctrl 0x10002000
+//	6	IO_port TLB_data_ctrl 0x10002010
+//	7	IO_port TLB_code_L1_addr 0x10002020 // 32b IO location reads to io_port+4
+//	8	IO_port TLB_data_L1_addr 0x10002040 // 32b IO location reads to io_port+4
+//	9	IO_port TLB_code_L2_addr 0x10002060 // 32b IO location reads to io_port+4
+//	10	IO_port TLB_data_L2_addr 0x10002080 // 32b IO location reads to io_port+4
+//	11	
+//	12	IO_port L0C_ctrl 0x100020b0
+//	13	IO_port L0D_ctrl 0x100020c0
+//	14	IO_port L2_ctrl	0x100020d0
+//	15	
+//	16	void reset_handler(){	
+0x0000_00001000 // label: label_reset_handler 
+//	17		sp = (mhartid+1)<<21;// needs to be on 2MB boundaries to be on seperate bank
+0x0000_00001000 csrrci t00, 0x00, mhartid 
+0x0000_00001004 addi sp, t00, 0x01
+0x0000_00001008 slli sp, sp, 0x15
+//	18		mideleg = 0x00000aaa;
+0x0000_0000100c lui s03, 0x00000 // prep to load # <0x1000 && >=0x800
+0x0000_00001010 andi s03, s03, 0xaaa // completed 32b immediate load of 0x00000aaa to ""
+0x0000_00001014 csrrw zero, s03, mideleg 
+//	19		medeleg = 0x0000bb00;
+0x0000_00001018 lui s04, 0x0000b // 32b load complete, lower bits are zero
+0x0000_0000101c andi s04, s04, 0xb00 // completed 32b immediate load of 0x0000bb00 to ""
+0x0000_00001020 csrrw zero, s04, medeleg 
+//	20		mstatus |= 0xa;// enable interrupts M (8) and S (2)
+0x0000_00001024 csrrsi zero, 0x0a, mstatus 
+//	21		mtvec = 0x00200000;//32b reg
+0x0000_00001028 lui s00, 0x00200 // 32b load complete, lower bits are zero
+0x0000_0000102c csrrw zero, s00, mtvec 
+//	22		stvec = 0x80200000;// OS space direct mapped, not swappable
+0x0000_00001030 lui s01, 0x80200 // 32b load complete, lower bits are zero
+0x0000_00001034 csrrw zero, s01, stvec 
+//	23	//	msp = mtvec +((mhartid+1)<<21);// avoids recalculating on every page miss - 32b reg
+//	24	//	ssp = stvec +((mhartid+1)<<21);// avoids recalculating on every page miss - 32b reg
+//	25		satp = (0x900000000008C800 | (mhartid<<44));
+0x0000_00001038 lui s05, 0x90000 // start 64b load 
+0x0000_0000103c slli t01, s05, 0x20
+0x0000_00001040 lui s06, 0x0008c // 
+0x0000_00001044 andi s06, s06, 0x800
+0x0000_00001048 add  t01, t01, s06 // completed load of 0x900000000008c800 as 64b immediate load "" 
+0x0000_0000104c csrrci s08, 0x00, mhartid 
+0x0000_00001050 slli s07, s08, 0x2c
+0x0000_00001054 or s02, s07, t01 
+0x0000_00001058 csrrwi s02, 0x00, satp 
+//	26		TLB_code_ctrl[0] = 1; // enable code TLB
+0x0000_0000105c lui s09, 0x10002 // 32b load complete, lower bits are zero
+0x0000_00001060 addi s10, zero, 0x01 // completed 32b immediate load of 0x00000001 to ""
+0x0000_00001064 sc.d.aq.rl s00, s09, s10 
+//	27		TLB_data_ctrl[0] = 1; // enable data TLB
+0x0000_00001068 lui s11, 0x10002 // 32b load complete, lower bits are zero
+0x0000_0000106c ori s11, s11, 0x10 // completed 32b immediate load of 0x10002010 to "TLB_data_ctrl"
+
+0x0000_00001070 addi s12, zero, 0x01 // completed 32b immediate load of 0x00000001 to ""
+0x0000_00001074 sc.d.aq.rl s00, s11, s12 
+//	28		L0C_ctrl[0] = 1;
+0x0000_00001078 lui s13, 0x10002 // 32b load complete, lower bits are zero
+0x0000_0000107c ori s13, s13, 0xb0 // completed 32b immediate load of 0x100020b0 to "L0C_ctrl"
+
+0x0000_00001080 addi s14, zero, 0x01 // completed 32b immediate load of 0x00000001 to ""
+0x0000_00001084 sc.d.aq.rl s00, s13, s14 
+//	29		L0D_ctrl[0] = 1;
+0x0000_00001088 lui s15, 0x10002 // 32b load complete, lower bits are zero
+0x0000_0000108c ori s15, s15, 0xc0 // completed 32b immediate load of 0x100020c0 to "L0D_ctrl"
+
+0x0000_00001090 addi s16, zero, 0x01 // completed 32b immediate load of 0x00000001 to ""
+0x0000_00001094 sc.d.aq.rl s00, s15, s16 
+//	30		L2_ctrl[0] = 1;
+0x0000_00001098 lui s17, 0x10002 // 32b load complete, lower bits are zero
+0x0000_0000109c ori s17, s17, 0xd0 // completed 32b immediate load of 0x100020d0 to "L2_ctrl"
+
+0x0000_000010a0 addi s18, zero, 0x01 // completed 32b immediate load of 0x00000001 to ""
+0x0000_000010a4 sc.d.aq.rl s00, s17, s18 
+//	31		OS_entry(); // OS cacheable, no-swappable 
+0x0000_000010a8 lui s19, 0x80000 // 32b load complete, lower bits are zero
+0x0000_000010ac jalr   zero,  0x000(s19) //  OS entry
+//	32		wfi;
+0x0000_000010b0 wfi // wait for interrupt 
+//	33	}
+0x0000_000010b4 fence 0 // order all memory operations 00
+0x0000_000010b8 jalr   zero,  0x000(a2) // return to caller
+0x0000_000010bc // label: label1_0
+// current depth = 0.0 // minus 1
+0x0000_000010bc fence 0 // order all memory operations 00
